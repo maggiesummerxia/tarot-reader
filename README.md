@@ -1,112 +1,120 @@
-# 🔮 Tarot Card Reader - Full Stack Version
+# 🔮 Tarot Card Reader
 
-A beautiful tarot card reading application with a Python Flask backend and HTML/JavaScript frontend.
+A beautiful, full-stack tarot card reading application with Progressive Web App (PWA) support. Draw tarot cards with upright and reversed orientations.
 
-## 📁 Files Included
+[![Deploy to Cloud Run](https://img.shields.io/badge/Deploy%20to-Cloud%20Run-blue)](https://console.cloud.google.com)
+[![Docker](https://img.shields.io/badge/Docker-Ready-brightgreen)](https://www.docker.com/)
+[![PWA](https://img.shields.io/badge/PWA-Enabled-orange)](https://web.dev/progressive-web-apps/)
 
-- `tarot_app.py` - Flask backend API server
-- `tarot_frontend.html` - Frontend web interface
-- `requirements.txt` - Python dependencies
-- `Dockerfile` - Docker container configuration
-- `docker-compose.yml` - Docker Compose configuration
-- `.dockerignore` - Docker ignore file
+## ✨ Features
 
-## 🐳 Setup with Docker (RECOMMENDED)
+- 🎴 Full 78-card tarot deck (22 Major Arcana + 56 Minor Arcana)
+- 🔄 Upright and Reversed orientations
+- 📱 Progressive Web App - Install on your phone!
+- 🐳 Docker containerized
+- ☁️ Deploy to Google Cloud Run
+- 🎨 Beautiful gradient UI with animations
+- ⚡ Fast and responsive
+- 📡 Works offline (after first visit)
 
-**No Python installation needed! Just Docker.**
+## 🚀 Quick Start
+
+### Run Locally with Docker
+
+```bash
+docker-compose up -d
+```
+
+Open: http://localhost:5000
+
+### Deploy to Google Cloud Run
+
+```bash
+gcloud run deploy tarot-reader \
+  --source . \
+  --platform managed \
+  --region europe-west2 \
+  --allow-unauthenticated \
+  --port 5000
+```
+
+## 📁 Project Structure
+
+```
+tarot-reader/
+├── static/                  # Static assets (PWA files, icons)
+│   ├── icon-192.png
+│   ├── icon-512.png
+│   ├── manifest.json
+│   └── service-worker.js
+├── templates/               # HTML templates
+│   └── index.html
+├── docs/                    # Documentation
+│   ├── README.md
+│   ├── PWA_INSTALL_GUIDE.md
+│   └── UPLOAD_CHECKLIST.md
+├── scripts/                 # Utility scripts
+│   ├── start.sh
+│   ├── start.bat
+│   └── deploy-pwa.sh
+├── tarot_app.py            # Flask backend
+├── requirements.txt        # Python dependencies
+├── Dockerfile              # Container configuration
+└── docker-compose.yml      # Docker Compose config
+```
+
+## 🛠️ Tech Stack
+
+- **Backend:** Python 3.11 + Flask
+- **Frontend:** HTML5 + CSS3 + Vanilla JavaScript
+- **Deployment:** Docker + Google Cloud Run
+- **PWA:** Service Worker + Web Manifest
+
+## 📱 Install as Mobile App
+
+### Android (Chrome):
+1. Visit the deployed URL in Chrome
+2. Tap menu (⋮) → "Add to Home screen"
+3. Tap "Add"
+
+### iOS (Safari):
+1. Visit the URL in Safari
+2. Tap Share → "Add to Home Screen"
+3. Tap "Add"
+
+## 🔧 Development
 
 ### Prerequisites
-- Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 
-### Quick Start
+- Python 3.11+
+- Docker & Docker Compose
+- Google Cloud SDK (for deployment)
 
-1. **Navigate to the project folder:**
-```bash
-cd /path/to/tarot-reader
-```
-
-2. **Start the app with Docker Compose:**
-```bash
-docker-compose up -d
-```
-
-3. **Open your browser:**
-```
-http://localhost:5000
-```
-
-4. **To stop the app:**
-```bash
-docker-compose down
-```
-
-### Docker Commands Cheat Sheet
+### Local Setup
 
 ```bash
-# Start the app (builds image first time)
+# Clone the repository
+git clone https://github.com/maggiesummerxia/tarot-reader.git
+cd tarot-reader
+
+# Run with Docker
 docker-compose up -d
 
-# View logs
-docker-compose logs -f
-
-# Stop the app
-docker-compose down
-
-# Rebuild after code changes
-docker-compose up -d --build
-
-# Check if container is running
-docker ps
-```
-
----
-
-## 🐍 Setup without Docker (Alternative)
-
-If you prefer to run it directly with Python:
-
-### Step 1: Install Python Dependencies
-
-Open your terminal/command prompt and navigate to the folder with these files, then run:
-
-```bash
+# Or run with Python
 pip install -r requirements.txt
-```
-
-### Step 2: Start the Backend Server
-
-Run the Flask server:
-
-```bash
 python tarot_app.py
 ```
 
-### Step 3: Open the Frontend
+## 📚 Documentation
 
-With the server running, open your web browser and go to:
+- [PWA Installation Guide](docs/PWA_INSTALL_GUIDE.md)
+- [Upload Checklist](docs/UPLOAD_CHECKLIST.md)
+- [Detailed README](docs/README.md)
 
-```
-http://localhost:5000
-```
-
-The page will automatically check the connection status:
-- 🟢 **Green** = Connected and ready
-- 🔴 **Red** = Server not running
-- 🔄 **Yellow** = Drawing cards
-
-## 🎴 How to Use
-
-1. Enter the number of cards you want to draw (1-78)
-2. Click "✨ Draw Cards ✨"
-3. Your cards will appear with their orientations (↑ Upright or ↓ Reversed)
-4. Click "Clear Reading" to start over
-
-## 📡 API Endpoints
-
-The backend provides these endpoints:
+## 🌐 API Endpoints
 
 ### `GET /`
-Serves the frontend HTML interface
+Serves the web interface
 
 ### `POST /api/draw`
 Draw tarot cards
@@ -123,71 +131,36 @@ Draw tarot cards
 {
   "cards": [
     {"card": "The Fool", "orientation": "Upright"},
-    {"card": "Ace of Cups", "orientation": "Reversed"},
-    {"card": "Queen of Swords", "orientation": "Upright"}
+    {"card": "Ace of Cups", "orientation": "Reversed"}
   ]
 }
 ```
 
 ### `GET /api/deck-info`
-Get information about the deck
+Get deck information
 
-**Response:**
-```json
-{
-  "total_cards": 78,
-  "major_arcana": 22,
-  "minor_arcana": 56,
-  "suits": ["Wands", "Cups", "Swords", "Pentacles"]
-}
-```
+## 💰 Cost
 
-## 🛠️ Troubleshooting
+**Cloud Run Free Tier:**
+- 2 million requests/month
+- 360,000 GB-seconds memory
+- 180,000 vCPU-seconds
 
-### Docker Issues
+For personal use: **$0/month** ✨
 
-**"docker-compose: command not found":**
-- Make sure Docker Desktop is installed and running
-- On some systems, use `docker compose` (without hyphen) instead of `docker-compose`
+## 🤝 Contributing
 
-**Port 5000 already in use:**
-- Stop other services using port 5000
-- Or edit `docker-compose.yml` and change `"5000:5000"` to `"5001:5000"` (then access on port 5001)
+Feel free to fork and submit PRs!
 
-**Container won't start:**
-- Check logs: `docker-compose logs`
-- Rebuild: `docker-compose up -d --build`
+## 📄 License
 
-### Non-Docker Issues
+MIT License - feel free to use for your own projects!
 
-**"Backend not connected" error:**
-- Make sure you ran `python tarot_app.py` and the server is running
-- Check that nothing else is using port 5000
-- Try accessing http://localhost:5000 directly
+## 👤 Author
 
-**"Module not found" error:**
-- Run `pip install -r requirements.txt` again
-- Make sure you're in the correct directory
+**Maggie Xia**
+- GitHub: [@maggiesummerxia](https://github.com/maggiesummerxia)
 
-**Port already in use:**
-- Close any other programs using port 5000
-- Or edit `tarot_app.py` and change `port=5000` to another number (like 5001)
+---
 
-## 🎨 Features
-
-- ✅ Full 78-card tarot deck (22 Major Arcana + 56 Minor Arcana)
-- ✅ Upright and Reversed orientations
-- ✅ Beautiful gradient design with animations
-- ✅ Real-time connection status
-- ✅ Error handling and validation
-- ✅ Responsive design for all screen sizes
-- ✅ RESTful API backend
-
-## 🔧 Customization
-
-You can easily customize:
-- **Colors:** Edit the CSS gradient in `tarot_frontend.html`
-- **Port:** Change `port=5000` in `tarot_app.py`
-- **Card meanings:** Add a card meanings database to the backend
-
-Enjoy your tarot readings! 🌟
+Made with ✨ and 🔮

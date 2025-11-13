@@ -4,6 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🔮 Tarot Card Reader</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Draw tarot cards with upright and reversed orientations">
+    <meta name="theme-color" content="#7e22ce">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Tarot Reader">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='icon-192.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icon-192.png') }}">
+    
     <style>
         * {
             margin: 0;
@@ -47,6 +62,29 @@
             font-size: 1.1em;
         }
 
+        .status {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 0.9em;
+        }
+
+        .status.connected {
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid rgba(0, 255, 0, 0.5);
+        }
+
+        .status.disconnected {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid rgba(255, 0, 0, 0.5);
+        }
+
+        .status.loading {
+            background: rgba(255, 255, 0, 0.2);
+            border: 1px solid rgba(255, 255, 0, 0.5);
+        }
+
         .input-section {
             text-align: center;
             margin-bottom: 30px;
@@ -82,13 +120,18 @@
             font-weight: bold;
         }
 
-        button:hover {
+        button:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
-        button:active {
+        button:active:not(:disabled) {
             transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         #results {
@@ -165,20 +208,35 @@
         .hidden {
             display: none;
         }
+
+        .error-message {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid rgba(255, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🔮 Tarot Card Reader 🔮</h1>
-        <p class="subtitle">78 cards • Upright & Reversed • Draw your destiny</p>
+        <p class="subtitle">78 cards • Upright & Reversed • Connected to Backend</p>
+
+        <div id="status" class="status disconnected">
+            🔴 Checking connection...
+        </div>
 
         <div class="input-section">
             <label for="numCards">How many cards would you like to draw?</label>
             <input type="number" id="numCards" min="1" max="78" value="3">
             <br>
-            <button onclick="drawCards()">✨ Draw Cards ✨</button>
+            <button id="drawBtn" onclick="drawCards()">✨ Draw Cards ✨</button>
             <button onclick="clearReading()">Clear Reading</button>
         </div>
+
+        <div id="error" class="hidden error-message"></div>
 
         <div id="results" class="hidden">
             <div class="results-header">
@@ -189,77 +247,82 @@
     </div>
 
     <script>
-        // Major Arcana (22 cards)
-        const MAJOR_ARCANA = [
-            "0 - The Fool",
-            "I - The Magician",
-            "II - The High Priestess",
-            "III - The Empress",
-            "IV - The Emperor",
-            "V - The Hierophant",
-            "VI - The Lovers",
-            "VII - The Chariot",
-            "VIII - Strength",
-            "IX - The Hermit",
-            "X - Wheel of Fortune",
-            "XI - Justice",
-            "XII - The Hanged Man",
-            "XIII - Death",
-            "XIV - Temperance",
-            "XV - The Devil",
-            "XVI - The Tower",
-            "XVII - The Star",
-            "XVIII - The Moon",
-            "XIX - The Sun",
-            "XX - Judgement",
-            "XXI - The World"
-        ];
+        const API_URL = 'http://localhost:5000';
+        let isConnected = false;
 
-        // Minor Arcana (56 cards)
-        const SUITS = ["Wands", "Cups", "Swords", "Pentacles"];
-        const RANKS = ["Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", 
-                       "Nine", "Ten", "Page", "Knight", "Queen", "King"];
-
-        function createDeck() {
-            const deck = [...MAJOR_ARCANA];
+        // Check backend connection on load
+        async function checkConnection() {
+            const statusDiv = document.getElementById('status');
+            const drawBtn = document.getElementById('drawBtn');
             
-            for (const suit of SUITS) {
-                for (const rank of RANKS) {
-                    deck.push(`${rank} of ${suit}`);
+            try {
+                const response = await fetch(`${API_URL}/api/deck-info`);
+                if (response.ok) {
+                    const data = await response.json();
+                    statusDiv.className = 'status connected';
+                    statusDiv.innerHTML = `🟢 Connected to backend • ${data.total_cards} cards ready`;
+                    isConnected = true;
+                    drawBtn.disabled = false;
+                } else {
+                    throw new Error('Backend not responding');
                 }
+            } catch (error) {
+                statusDiv.className = 'status disconnected';
+                statusDiv.innerHTML = '🔴 Backend not connected • Make sure server is running';
+                isConnected = false;
+                drawBtn.disabled = true;
             }
-            
-            return deck;
         }
 
-        function shuffleArray(array) {
-            const shuffled = [...array];
-            for (let i = shuffled.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-            }
-            return shuffled;
-        }
-
-        function drawCards() {
-            const numCards = parseInt(document.getElementById('numCards').value);
-            
-            if (numCards < 1 || numCards > 78) {
-                alert('Please enter a number between 1 and 78');
+        async function drawCards() {
+            if (!isConnected) {
+                showError('Backend is not connected. Please start the server.');
                 return;
             }
 
-            const deck = createDeck();
-            const shuffled = shuffleArray(deck);
-            const drawn = [];
-
-            for (let i = 0; i < numCards; i++) {
-                const card = shuffled[i];
-                const orientation = Math.random() < 0.5 ? 'Upright' : 'Reversed';
-                drawn.push({ card, orientation });
+            const numCards = parseInt(document.getElementById('numCards').value);
+            
+            if (numCards < 1 || numCards > 78) {
+                showError('Please enter a number between 1 and 78');
+                return;
             }
 
-            displayCards(drawn);
+            // Show loading state
+            const statusDiv = document.getElementById('status');
+            const drawBtn = document.getElementById('drawBtn');
+            statusDiv.className = 'status loading';
+            statusDiv.innerHTML = '🔄 Drawing cards...';
+            drawBtn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_URL}/api/draw`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ num_cards: numCards })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to draw cards');
+                }
+
+                const data = await response.json();
+                displayCards(data.cards);
+                hideError();
+
+                // Reset status
+                statusDiv.className = 'status connected';
+                statusDiv.innerHTML = '🟢 Connected to backend';
+                
+            } catch (error) {
+                showError(`Error: ${error.message}`);
+                statusDiv.className = 'status disconnected';
+                statusDiv.innerHTML = '🔴 Error communicating with backend';
+            } finally {
+                drawBtn.disabled = false;
+            }
         }
 
         function displayCards(cards) {
@@ -294,6 +357,18 @@
         function clearReading() {
             const results = document.getElementById('results');
             results.classList.add('hidden');
+            hideError();
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+        }
+
+        function hideError() {
+            const errorDiv = document.getElementById('error');
+            errorDiv.classList.add('hidden');
         }
 
         // Allow Enter key to draw cards
@@ -301,6 +376,36 @@
             if (e.key === 'Enter') {
                 drawCards();
             }
+        });
+
+        // Check connection when page loads
+        checkConnection();
+
+        // Recheck connection every 10 seconds
+        setInterval(checkConnection, 10000);
+
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register("{{ url_for('static', filename='service-worker.js') }}")
+                    .then((registration) => {
+                        console.log('Service Worker registered successfully:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+
+        // PWA Install prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent the mini-infobar from appearing on mobile
+            e.preventDefault();
+            // Stash the event so it can be triggered later
+            deferredPrompt = e;
+            // You could show an install button here if you want
+            console.log('PWA install prompt available');
         });
     </script>
 </body>

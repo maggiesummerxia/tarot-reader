@@ -1,8 +1,7 @@
 const CACHE_NAME = 'tarot-reader-v1';
 const urlsToCache = [
   '/',
-  '/tarot_frontend.html',
-  '/manifest.json'
+  '/static/manifest.json'
 ];
 
 // Install event - cache files
