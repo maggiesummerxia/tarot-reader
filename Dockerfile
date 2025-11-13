@@ -11,7 +11,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application files
 COPY tarot_app.py .
-COPY tarot_frontend.html .
+COPY templates/ templates/
+COPY static/ static/
 
 # Expose port 5000
 EXPOSE 5000
