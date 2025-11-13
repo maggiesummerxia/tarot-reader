@@ -59,6 +59,26 @@ def index():
     """Serve the frontend HTML."""
     return send_from_directory('.', 'tarot_frontend.html')
 
+@app.route('/manifest.json')
+def manifest():
+    """Serve the PWA manifest."""
+    return send_from_directory('.', 'manifest.json')
+
+@app.route('/service-worker.js')
+def service_worker():
+    """Serve the service worker."""
+    return send_from_directory('.', 'service-worker.js')
+
+@app.route('/icon-192.png')
+def icon_192():
+    """Serve 192x192 icon."""
+    return send_from_directory('.', 'icon-192.png')
+
+@app.route('/icon-512.png')
+def icon_512():
+    """Serve 512x512 icon."""
+    return send_from_directory('.', 'icon-512.png')
+
 @app.route('/api/draw', methods=['POST'])
 def draw_cards():
     """
