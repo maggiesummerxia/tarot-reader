@@ -164,6 +164,3 @@ MIT License - feel free to use for your own projects!
 ---
 
 Made with ✨ and 🔮
-# CI/CD enabled
-# Testing CI/CD with all permissions
-# Add serviceUsageConsumer permission
