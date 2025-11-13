@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔮 Tarot Card Reader</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .subtitle {
+            text-align: center;
+            margin-bottom: 30px;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .input-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        input[type="number"] {
+            padding: 12px 20px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            width: 150px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+
+        button {
+            padding: 15px 40px;
+            font-size: 1.2em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        #results {
+            margin-top: 30px;
+        }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-number {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+
+        .card-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #ffd700;
+        }
+
+        .card-orientation {
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
+
+        .upright {
+            color: #90EE90;
+        }
+
+        .reversed {
+            color: #FFB6C1;
+        }
+
+        .results-header {
+            text-align: center;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔮 Tarot Card Reader 🔮</h1>
+        <p class="subtitle">78 cards • Upright & Reversed • Draw your destiny</p>
+
+        <div class="input-section">
+            <label for="numCards">How many cards would you like to draw?</label>
+            <input type="number" id="numCards" min="1" max="78" value="3">
+            <br>
+            <button onclick="drawCards()">✨ Draw Cards ✨</button>
+            <button onclick="clearReading()">Clear Reading</button>
+        </div>
+
+        <div id="results" class="hidden">
+            <div class="results-header">
+                <span id="readingTitle"></span>
+            </div>
+            <div id="cardsContainer" class="cards-container"></div>
+        </div>
+    </div>
+
+    <script>
+        // Major Arcana (22 cards)
+        const MAJOR_ARCANA = [
+            "0 - The Fool",
+            "I - The Magician",
+            "II - The High Priestess",
+            "III - The Empress",
+            "IV - The Emperor",
+            "V - The Hierophant",
+            "VI - The Lovers",
+            "VII - The Chariot",
+            "VIII - Strength",
+            "IX - The Hermit",
+            "X - Wheel of Fortune",
+            "XI - Justice",
+            "XII - The Hanged Man",
+            "XIII - Death",
+            "XIV - Temperance",
+            "XV - The Devil",
+            "XVI - The Tower",
+            "XVII - The Star",
+            "XVIII - The Moon",
+            "XIX - The Sun",
+            "XX - Judgement",
+            "XXI - The World"
+        ];
+
+        // Minor Arcana (56 cards)
+        const SUITS = ["Wands", "Cups", "Swords", "Pentacles"];
+        const RANKS = ["Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", 
+                       "Nine", "Ten", "Page", "Knight", "Queen", "King"];
+
+        function createDeck() {
+            const deck = [...MAJOR_ARCANA];
+            
+            for (const suit of SUITS) {
+                for (const rank of RANKS) {
+                    deck.push(`${rank} of ${suit}`);
+                }
+            }
+            
+            return deck;
+        }
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function drawCards() {
+            const numCards = parseInt(document.getElementById('numCards').value);
+            
+            if (numCards < 1 || numCards > 78) {
+                alert('Please enter a number between 1 and 78');
+                return;
+            }
+
+            const deck = createDeck();
+            const shuffled = shuffleArray(deck);
+            const drawn = [];
+
+            for (let i = 0; i < numCards; i++) {
+                const card = shuffled[i];
+                const orientation = Math.random() < 0.5 ? 'Upright' : 'Reversed';
+                drawn.push({ card, orientation });
+            }
+
+            displayCards(drawn);
+        }
+
+        function displayCards(cards) {
+            const results = document.getElementById('results');
+            const readingTitle = document.getElementById('readingTitle');
+            const cardsContainer = document.getElementById('cardsContainer');
+
+            results.classList.remove('hidden');
+            readingTitle.textContent = `Your ${cards.length} Card Reading`;
+            cardsContainer.innerHTML = '';
+
+            cards.forEach((item, index) => {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'card';
+                cardDiv.style.animationDelay = `${index * 0.1}s`;
+
+                const symbol = item.orientation === 'Upright' ? '↑' : '↓';
+                const orientationClass = item.orientation.toLowerCase();
+
+                cardDiv.innerHTML = `
+                    <div class="card-number">Card ${index + 1}</div>
+                    <div class="card-name">${item.card}</div>
+                    <div class="card-orientation ${orientationClass}">
+                        ${symbol} ${item.orientation}
+                    </div>
+                `;
+
+                cardsContainer.appendChild(cardDiv);
+            });
+        }
+
+        function clearReading() {
+            const results = document.getElementById('results');
+            results.classList.add('hidden');
+        }
+
+        // Allow Enter key to draw cards
+        document.getElementById('numCards').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                drawCards();
+            }
+        });
+    </script>
+</body>
+</html>
