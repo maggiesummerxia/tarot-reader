@@ -40,3 +40,9 @@ Thumbs.db
 
 # Docker
 *.log
+
+# Personal Notes (private)
+PERSONAL_NOTES.md
+
+# Personal notes (contains deployment URLs and project-specific info)
+PERSONAL_NOTES.md
