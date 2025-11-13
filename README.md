@@ -164,3 +164,4 @@ MIT License - feel free to use for your own projects!
 ---
 
 Made with ✨ and 🔮
+# CI/CD enabled
